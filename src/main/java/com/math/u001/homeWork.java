@@ -9,18 +9,61 @@ public class homeWork {
 
     /**
      * 思路二的实现方式
-     * 注意负数的情形也要兼容
+     * 注意负数的情形也要兼容，大概是利用负数=反码+1 的原理，要注意位数的限定。比如这里简单点就是32位。
      *
      * @param decimalSource
      * @return
      */
     public static String decimalToBinary(int decimalSource) {
         StringBuilder binary = new StringBuilder();
-        while (decimalSource > 0) {
-            binary.append(decimalSource & 1);
-            decimalSource = decimalSource >> 1;
+        int optNum = decimalSource;
+
+        //如果是负数，先统一转化成正数处理
+        if (decimalSource < 0) {
+//            optNum = -optNum;
+            optNum = ((optNum * -1) ^ (Integer.MAX_VALUE)) + 1;
         }
-        return binary.reverse().toString();
+        while (optNum != 0) {
+            binary.append(optNum & 1);
+            optNum = optNum >> 1;
+        }
+        //先翻转
+        binary.reverse();
+
+        //限定32位补足
+        while (binary.length() < 32) {
+            //如果是负数，前面补1，正数，则是前面补0
+            if (decimalSource < 0) {
+                binary.insert(0, 1);
+            } else {
+                binary.insert(0, 0);
+            }
+        }
+
+        return binary.toString();
+    }
+
+
+    /**
+     * 前面那种方法是比较符合人的思维，从最低位开始，但也会绕一个圈子，下面的实现是从最高位开始，更简洁一点
+     * 这里的负数处理跟上面的也有点不同，这里是将有符号数负数转为一个无符号数对应的正数进行处理
+     *
+     * @param value
+     * @return
+     */
+    public static String decimal2Binary(int value) {
+        StringBuilder result = new StringBuilder();
+        if (value < 0) {
+            value = ((value * -1) ^ (Integer.MAX_VALUE)) + 1;
+        }
+        for (int i = 31; i >= 0; i--) {
+            if ((value & (1 << i)) > 0) {
+                result.append(1);
+            } else {
+                result.append(0);
+            }
+        }
+        return result.toString();
     }
 
     public static void main(String args[]) {
@@ -32,5 +75,10 @@ public class homeWork {
         System.out.println(String.format("%d转为二进制后的结果是：%s", b, decimalToBinary(b)));
         System.out.println(String.format("%d转为二进制后的结果是：%s", c, decimalToBinary(c)));
         System.out.println(String.format("%d转为二进制后的结果是：%s", d, decimalToBinary(d)));
+
+        System.out.println(String.format("%d转为二进制后的结果是：%s", a, decimal2Binary(a)));
+        System.out.println(String.format("%d转为二进制后的结果是：%s", b, decimal2Binary(b)));
+        System.out.println(String.format("%d转为二进制后的结果是：%s", c, decimal2Binary(c)));
+        System.out.println(String.format("%d转为二进制后的结果是：%s", d, decimal2Binary(d)));
     }
 }
